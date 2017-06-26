@@ -32,3 +32,12 @@ HEADERS += \
 
 FORMS += \
         mainwindow.ui
+
+unix|win32: LIBS += -ltag
+
+DISTFILES +=
+
+
+QT += core gui
+QT += multimedia
+QT += multimediawidgets

@@ -15,6 +15,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private slots:
+    void on_TableMusic_cellDoubleClicked(int row, int column);
+
 private:
     Ui::MainWindow *ui;
 };
