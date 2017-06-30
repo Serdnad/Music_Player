@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <qmediaplayer.h>
 
 namespace Ui {
 class MainWindow;
@@ -17,6 +18,19 @@ public:
 
 private slots:
     void on_TableMusic_cellDoubleClicked(int row, int column);
+
+    void on_SliderVolume_sliderMoved(int position);
+
+    void on_ButtonToggle_clicked();
+
+    void on_ButtonNext_clicked();
+
+    void on_ButtonPrev_clicked();
+
+    void on_MediaPlayer_stateChanged(QMediaPlayer::State state);
+    void on_MediaPlayer_positionChanged(qint64 position);
+
+    void on_SliderSeekTrack_sliderReleased();
 
 private:
     Ui::MainWindow *ui;

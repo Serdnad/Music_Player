@@ -41,3 +41,6 @@ DISTFILES +=
 QT += core gui
 QT += multimedia
 QT += multimediawidgets
+
+RESOURCES += \
+    resources.qrc
