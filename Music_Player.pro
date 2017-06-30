@@ -25,18 +25,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
 
 FORMS += \
         mainwindow.ui
 
-unix|win32: LIBS += -ltag
-
 DISTFILES +=
-
 
 QT += core gui
 QT += multimedia
@@ -44,3 +41,8 @@ QT += multimediawidgets
 
 RESOURCES += \
     resources.qrc
+
+unix|win32: LIBS += -L$$PWD/libtaginfo/ -ltag
+
+INCLUDEPATH += $$PWD/libtaginfo
+DEPENDPATH += $$PWD/libtaginfo

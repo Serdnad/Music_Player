@@ -29,6 +29,7 @@ private slots:
 
     void on_MediaPlayer_stateChanged(QMediaPlayer::State state);
     void on_MediaPlayer_positionChanged(qint64 position);
+    void on_MediaPlayer_mediaStatusChanged(QMediaPlayer::MediaStatus status);
 
     void on_SliderSeekTrack_sliderReleased();
 

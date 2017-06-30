@@ -5,6 +5,7 @@
 #include "qmediaplayer.h"
 #include "qmediametadata.h"
 #include "qmediaplaylist.h"
+#include "qmediacontent.h"
 #include "qdiriterator.h"
 #include "taglib/id3v2tag.h"
 
@@ -38,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->TableMusic->setRowCount(songs.size()+1);
     ui->TableMusic->hideColumn(6);
+    ui->TableMusic->hideColumn(7);
 
     for(int i = 0; i < songs.size(); i++) {
         int track = songs[i].tag()->track();
@@ -48,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QString album = songs[i].tag()->album().toCString();
         QString path = songs[i].file()->name();
         QString genre = songs[i].tag()->genre().toCString();
+
 
         QTableWidgetItem* cellTrack = new QTableWidgetItem(); cellTrack->setTextAlignment(Qt::AlignCenter|Qt::AlignRight);
         cellTrack->setData(Qt::EditRole, track);
@@ -63,6 +66,8 @@ MainWindow::MainWindow(QWidget *parent) :
         cellPath->setText(path);
         QTableWidgetItem* cellGenre = new QTableWidgetItem();
         cellGenre->setText(genre);
+        QTableWidgetItem* cellID = new QTableWidgetItem();
+        cellGenre->setData(Qt::EditRole, i);
 
         ui->TableMusic->setItem(i, 0, cellTrack);
         ui->TableMusic->setItem(i, 1, cellTitle);
@@ -71,6 +76,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->TableMusic->setItem(i, 4, cellAlbum);
         ui->TableMusic->setItem(i, 5, cellGenre);
         ui->TableMusic->setItem(i, 6, cellPath);
+        ui->TableMusic->setItem(i, 7, cellID);
     }
 
     //todo: find each song's image
@@ -88,6 +94,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->TableMusic->resizeColumnsToContents();
 
     connect(MediaPlayer, SIGNAL(stateChanged(QMediaPlayer::State)), this, SLOT(on_MediaPlayer_stateChanged(QMediaPlayer::State)));
+    connect(MediaPlayer, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(on_MediaPlayer_mediaStatusChanged(QMediaPlayer::MediaStatus)));
     connect(MediaPlayer, SIGNAL(positionChanged(qint64)), this, SLOT(on_MediaPlayer_positionChanged(qint64)));
     //QObject::connect(&MediaPlayer, SIGNAL(stateChanged(QMediaPlayer::State)));
     //MediaPlayer->stateChanged(QMediaPlayer::state() {}); state);
@@ -105,8 +112,6 @@ void MainWindow::on_TableMusic_cellDoubleClicked(int row, int column)
     int row_iter = row-1;
     while(row_iter++ < ui->TableMusic->rowCount()-2 )// && row_iter - row < 10)
     {
-        qDebug() << row_iter;
-
         QString filePath = ui->TableMusic->item(row_iter, 6)->text();
         MediaPlaylist->addMedia(QUrl::fromLocalFile(filePath));
     }
@@ -154,30 +159,36 @@ void MainWindow::on_MediaPlayer_stateChanged(QMediaPlayer::State state)
     if(state == QMediaPlayer::PlayingState)
     {
         ui->ButtonToggle->setIcon(QIcon(":/Images/Images/Player_Pause.png"));
-        qDebug() << ui->TableMusic->item(ui->TableMusic->currentRow(), 2)->text();
+        //qDebug() << ui->TableMusic->item(ui->TableMusic->currentRow(), 2)->text();
         QString lengthStr = ui->TableMusic->item(ui->TableMusic->currentRow(), 2)->text();
         int length = lengthStr.split(':')[0].toInt() * 60 + lengthStr.split(':')[1].toInt();
-        qDebug() << length;
+        //qDebug() << length;
         ui->SliderSeekTrack->setRange(0, length);
 
 
-        ui->LabelSongInfo->setText("okay");//MediaPlayer->metaData(QMediaMetaData::AlbumArtist).toString());
+        qDebug() << "URL:";
+        qDebug() << MediaPlayer->media().resources().first().url().path(); //media.resources.first().url().path()//MediaPlayer->currentMedia().canonicalUrl().toString();
+
+
+        ui->LabelSongInfo->setText("okay"); //MediaPlayer->metaData(QMediaMetaData::AlbumArtist).toString());
+        ui->LabelTimeEnd->setText(MediaPlayer->metaData(QMediaMetaData::Duration).toString());
     }
     else if(state == QMediaPlayer::PausedState)
         ui->ButtonToggle->setIcon(QIcon(":/Images/Images/Player_Play.png"));
     else if(state ==QMediaPlayer::StoppedState)
     {
-        //todo: change to play next from queue
-        //ui->TableMusic->selectRow(ui->TableMusic->currentRow()+1);
-        //QString nextFilePath = ui->TableMusic->item(ui->TableMusic->currentRow(), 6)->text();
-        //MediaPlayer->setMedia(QUrl::fromLocalFile(nextFilePath));
-        //MediaPlayer->play();
+
     }
 }
 
 void MainWindow::on_MediaPlayer_positionChanged(qint64 position)
 {
-    ui->SliderSeekTrack->setValue((int)position/1000);
+    int time = position/1000;
+    ui->SliderSeekTrack->setValue(time);
+    ui->LabelTimeCurrent->setText(QString("%1:%2").arg(time/60).arg(QString("%1").arg(time%60, 2, 10, QChar('0'))));
+
+    //qDebug() << MediaPlayer->isMetaDataAvailable();
+    //qDebug() << MediaPlayer->metaData(QMediaMetaData::Duration).toString();
 }
 
 void MainWindow::on_SliderSeekTrack_sliderReleased()
@@ -185,10 +196,14 @@ void MainWindow::on_SliderSeekTrack_sliderReleased()
     MediaPlayer->setPosition(ui->SliderSeekTrack->value()*1000);
 }
 
-
-void playNext() //temporary function
+void MainWindow::on_MediaPlayer_mediaStatusChanged(QMediaPlayer::MediaStatus status)
 {
-    //QString nextFilePath = ui->TableMusic->item(ui->TableMusic->currentRow(), 6)->text();
-    //MediaPlayer->setMedia(QUrl::fromLocalFile(nextFilePath));
-    //MediaPlayer->play();
+    //qDebug() << "Media NOT loaded";
+    if(status == QMediaPlayer::LoadedMedia)
+    {
+        qDebug() << "Media loaded";
+        qDebug() << MediaPlayer->metaData(QMediaMetaData::AlbumTitle);
+    }
+    qDebug() << status;
+    qDebug() << MediaPlayer->media().resources().first().url().path();
 }

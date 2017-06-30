@@ -256,6 +256,11 @@
           <string>Path</string>
          </property>
         </column>
+        <column>
+         <property name="text">
+          <string>Song ID</string>
+         </property>
+        </column>
        </widget>
       </item>
       <item alignment="Qt::AlignRight">
